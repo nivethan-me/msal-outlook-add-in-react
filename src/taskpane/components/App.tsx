@@ -1,47 +1,68 @@
-import * as React from "react";
-import Header from "./Header";
-import HeroList, { HeroListItem } from "./HeroList";
-import TextInsertion from "./TextInsertion";
-import { makeStyles } from "@fluentui/react-components";
-import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular } from "@fluentui/react-icons";
-import { insertText } from "../taskpane";
+import React, { useState } from "react";
 
-interface AppProps {
-  title: string;
-}
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
+// import "./App.css";
+import Button from "react-bootstrap/Button";
+import { ProfileData } from "./auth-components/ProfileData";
+import { PageLayout } from "./auth-components/PageLayout";
+import { loginRequest } from "./auth-config";
+import { callMsGraph } from "./graph";
 
-const useStyles = makeStyles({
-  root: {
-    minHeight: "100vh",
-  },
-});
+/**
+ * Renders information about the signed-in user or a button to retrieve data about the user
+ */
 
-const App: React.FC<AppProps> = (props: AppProps) => {
-  const styles = useStyles();
-  // The list items are static and won't change at runtime,
-  // so this should be an ordinary const, not a part of state.
-  const listItems: HeroListItem[] = [
-    {
-      icon: <Ribbon24Regular />,
-      primaryText: "Achieve more with Office integration",
-    },
-    {
-      icon: <LockOpen24Regular />,
-      primaryText: "Unlock features and functionality",
-    },
-    {
-      icon: <DesignIdeas24Regular />,
-      primaryText: "Create and visualize like a pro",
-    },
-  ];
+const ProfileContent = () => {
+  const { instance, accounts } = useMsal();
+  const [graphData, setGraphData] = useState(null);
+
+  function RequestProfileData() {
+    // Silently acquires an access token which is then attached to a request for MS Graph data
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        callMsGraph(response.accessToken).then((response) => setGraphData(response));
+      });
+  }
 
   return (
-    <div className={styles.root}>
-      <Header logo="assets/logo-filled.png" title={props.title} message="Welcome" />
-      <HeroList message="Discover what this add-in can do for you today!" items={listItems} />
-      <TextInsertion insertText={insertText} />
+    <>
+      <h5 className="profileContent">Welcome {accounts[0].name}</h5>
+      {graphData ? (
+        <ProfileData graphData={graphData} />
+      ) : (
+        <Button variant="secondary" onClick={RequestProfileData}>
+          Request Profile
+        </Button>
+      )}
+    </>
+  );
+};
+
+/**
+ * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
+ */
+const MainContent = () => {
+  return (
+    <div className="App">
+      <AuthenticatedTemplate>
+        <ProfileContent />
+      </AuthenticatedTemplate>
+
+      <UnauthenticatedTemplate>
+        <h5 className="card-title">Please sign-in to see your profile information.</h5>
+      </UnauthenticatedTemplate>
     </div>
   );
 };
 
-export default App;
+export default function App() {
+  return (
+    <PageLayout>
+      <MainContent />
+    </PageLayout>
+  );
+}

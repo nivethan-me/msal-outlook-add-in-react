@@ -28,11 +28,15 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
+    "@azure/msal-browser": "^3.20.0",
+    "@azure/msal-react": "^2.0.22",
     "@fluentui/react-components": "^9.46.8",
     "@fluentui/react-icons": "^2.0.232",
+    "bootstrap": "^5.3.3",
     "core-js": "^3.36.0",
     "es6-promise": "^4.2.8",
     "react": "^18.2.0",
+    "react-bootstrap": "^2.10.4",
     "react-dom": "^18.2.0",
     "regenerator-runtime": "^0.14.1"
   },
