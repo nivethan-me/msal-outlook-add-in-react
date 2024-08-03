@@ -22,6 +22,7 @@ module.exports = async (env, options) => {
       vendor: ["react", "react-dom", "core-js", "@fluentui/react-components", "@fluentui/react-icons"],
       taskpane: ["./src/taskpane/index.tsx", "./src/taskpane/taskpane.html"],
       commands: "./src/commands/commands.ts",
+      login: "./src/taskpane/components/login/login.ts",
     },
     output: {
       clean: true,
@@ -84,6 +85,11 @@ module.exports = async (env, options) => {
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
         chunks: ["polyfill", "vendor", "taskpane"],
+      }),
+      new HtmlWebpackPlugin({
+        filename: "login/login.html",
+        template: "./src/taskpane/components/login/login.html",
+        chunks: ["login"],
       }),
       new HtmlWebpackPlugin({
         filename: "commands.html",
